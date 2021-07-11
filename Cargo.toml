@@ -1,0 +1,19 @@
+[package]
+name = "tim-systick-monotonic"
+version = "0.1.0"
+authors = ["Roman Isaikin <romix.lab@gmail.com>"]
+edition = "2018"
+description = "RTIC Monotonic implementation for STM32L0 and STM32F0 using linked timers."
+license = "MIT"
+repository = "https://github.com/romixlab/tim-systick-monotonic"
+
+[dependencies]
+cortex-m = "0.7"
+rtic-monotonic = "0.1.0-alpha.2"
+stm32f0 = { version = "0.9", optional = true }
+stm32l0 = { version = "0.10", optional = true }
+
+[features]
+l0x1-tim21-tim22 = ["stm32l0/stm32l0x1"]
+f0x1-tim15-tim17 = ["stm32f0/stm32f0x1"]
+f0x1-tim15-tim16 = ["stm32f0/stm32f0x1"]
