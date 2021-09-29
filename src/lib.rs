@@ -16,6 +16,7 @@ use stm32f0::stm32f0x1 as pac;
 use stm32f0::stm32f0x2 as pac;
 #[cfg(feature = "f0x1-tim15-tim16")]
 use stm32f0::stm32f0x1 as pac;
+use core::fmt::Formatter;
 
 #[cfg(feature = "l0x1-tim21-tim22")]
 pub type TimMsb = pac::TIM21;
@@ -41,6 +42,12 @@ pub struct TimSystickMonotonic<const FREQ: u32> {
     systick: SYST,
     pub tim_msb: TimMsb,
     pub tim_lsb: TimLsb,
+}
+
+impl<const FREQ: u32> core::fmt::Debug for TimSystickMonotonic<FREQ> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "TimSystickMonotonic({})", FREQ)
+    }
 }
 
 impl<const FREQ: u32> TimSystickMonotonic<FREQ> {
