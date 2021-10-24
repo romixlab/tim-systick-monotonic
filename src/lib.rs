@@ -16,6 +16,8 @@ use stm32f0::stm32f0x1 as pac;
 use stm32f0::stm32f0x2 as pac;
 #[cfg(feature = "f0x1-tim15-tim16")]
 use stm32f0::stm32f0x1 as pac;
+#[cfg(feature = "h743-tim15-tim17")]
+use stm32h7::stm32h743 as pac;
 use core::fmt::Formatter;
 
 #[cfg(feature = "l0x1-tim21-tim22")]
@@ -37,6 +39,11 @@ pub type TimLsb = pac::TIM17;
 pub type TimMsb = pac::TIM15;
 #[cfg(feature = "f0x1-tim15-tim16")]
 pub type TimLsb = pac::TIM16;
+
+#[cfg(feature = "h743-tim15-tim17")]
+pub type TimMsb = pac::TIM15;
+#[cfg(feature = "h743-tim15-tim17")]
+pub type TimLsb = pac::TIM17;
 
 pub struct TimSystickMonotonic<const FREQ: u32> {
     systick: SYST,
@@ -64,7 +71,7 @@ impl<const FREQ: u32> TimSystickMonotonic<FREQ> {
 
     fn timers_init(tim_msb: &mut TimMsb, tim_lsb: &mut TimLsb) {
         let device = unsafe { pac::Peripherals::steal() };
-        #[cfg(any(feature = "f0x1-tim15-tim17", feature = "f0x2-tim15-tim17"))] {
+        #[cfg(any(feature = "f0x1-tim15-tim17", feature = "f0x2-tim15-tim17", feature = "h743-tim15-tim17"))] {
             device.RCC.apb2enr.modify(|_, w| w.tim15en().enabled().tim17en().enabled());
             device.RCC.apb2rstr.modify(|_, w| w.tim15rst().reset().tim17rst().reset());
             device.RCC.apb2rstr.modify(|_, w| w.tim15rst().clear_bit().tim17rst().clear_bit());
@@ -80,11 +87,11 @@ impl<const FREQ: u32> TimSystickMonotonic<FREQ> {
             device.RCC.apb2rstr.modify(|_, w| w.tim21rst().clear_bit().tim22rst().clear_bit());
         }
 
-        // LSB timer init, F0: TIM16/17, L0: TIM22
+        // LSB timer init, F0: TIM16/17, L0: TIM22, H7: TIM17
         tim_lsb.cr1.modify(|_, w| w.cen().clear_bit());
         #[cfg(feature = "l0x1-tim21-tim22")]
         tim_lsb.cr2.modify(|_, w| w.mms().update()); // update event as trigger ouput (TRGO)
-        #[cfg(any(feature = "f0x1-tim15-tim17", feature = "f0x2-tim15-tim17", feature = "f0x1-tim15-tim16"))] {
+        #[cfg(any(feature = "f0x1-tim15-tim17", feature = "f0x2-tim15-tim17", feature = "f0x1-tim15-tim16", feature = "h743-tim15-tim17"))] {
             tim_lsb.ccmr1_output_mut().modify(|_, w| unsafe { w.oc1m().bits(0b110) }); // PWM Mode 1
             tim_lsb.ccer.modify(|_, w| w.cc1e().set_bit()); // Output compare enable
             tim_lsb.ccr1.write(|w| unsafe { w.bits(0xffff) }); // Clock msb timer on overflow
@@ -95,7 +102,7 @@ impl<const FREQ: u32> TimSystickMonotonic<FREQ> {
         tim_lsb.cr1.modify(|_, w| w.urs().set_bit());
         tim_lsb.egr.write(|w| w.ug().set_bit());
 
-        // MSB timer init, F0: TIM15, L0: TIM21
+        // MSB timer init, F0: TIM15, L0: TIM21, H7: TIM15
         tim_msb.cr1.modify(|_, w| w.cen().clear_bit());
         #[cfg(feature = "f0x1-tim15-tim16")]
         tim_msb.smcr.modify(|_, w| unsafe { w.ts().bits(0b010).sms().bits(0b111) }); // F0: clock from TIM16_OC
@@ -103,6 +110,8 @@ impl<const FREQ: u32> TimSystickMonotonic<FREQ> {
         tim_msb.smcr.modify(|_, w| unsafe { w.ts().bits(0b011).sms().bits(0b111) }); // F0: clock from TIM17_OC
         #[cfg(feature = "l0x1-tim21-tim22")]
         tim_msb.smcr.modify(|_, w| w.ts().itr1().sms().ext_clock_mode()); // L0: clock from TIM22
+        #[cfg(feature = "h743-tim15-tim17")]
+        tim_msb.smcr.modify(|_, w| unsafe { w.ts_2_0().bits(0b011).ts_4_3().bits(0b00).sms().bits(0b111) }); //ITR3: 0b0011, ext_clock_mode: 0111
 
         tim_msb.cr1.modify(|_, w| w.cen().set_bit());
         tim_lsb.cr1.modify(|_, w| w.cen().set_bit());
