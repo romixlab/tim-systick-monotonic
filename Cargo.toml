@@ -13,7 +13,7 @@
 [package]
 edition = "2018"
 name = "tim-systick-monotonic"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Roman Isaikin <romix.lab@gmail.com>"]
 description = "RTIC Monotonic implementation for STM32L0 and STM32F0 using linked timers."
 license = "MIT"
