@@ -1,5 +1,7 @@
 RTIC Monotonic implementation on a pair of 16 bit timers for various STM microcontrollers.
 ---
+![crates.io](https://img.shields.io/crates/v/tim-systick-monotonic.svg)
+![crates.io](https://img.shields.io/crates/d/tim-systick-monotonic.svg)
 
 Select which timer pair to use with features, currently supported:
 * `l0x1-tim21-tim22` - STM32L0x1 TIM21+TIM22
