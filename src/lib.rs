@@ -1,10 +1,8 @@
 #![no_std]
 
 use cortex_m::peripheral::SYST;
-use rtic_monotonic::{
-    embedded_time::{clock::Error, fraction::Fraction},
-    Clock, Instant, Monotonic
-};
+use rtic_monotonic::Monotonic;
+use embedded_time::{Clock, Instant, clock::Error, fraction::Fraction},
 use cortex_m::peripheral::syst::SystClkSource;
 use embedded_hal::blocking::delay::{DelayUs, DelayMs};
 
@@ -143,6 +141,9 @@ impl<const FREQ: u32> Clock for TimSystickMonotonic<FREQ> {
 
 impl<const FREQ: u32> Monotonic for TimSystickMonotonic<FREQ> {
     const DISABLE_INTERRUPT_ON_EMPTY_QUEUE: bool = true;
+
+    type Instant = embedded_time::Instant;
+    type Duration = embedded_time::duration::Duration;
 
     unsafe fn reset(&mut self) {
         self.systick.set_clock_source(SystClkSource::Core);
